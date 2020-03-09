@@ -45,28 +45,38 @@ class ProductSchema(ma.ModelSchema):
 
 
 # create single product
-@app.route('/product', methods=['POST'])
+@app.route('/product/', methods=['POST', 'GET'])
 def create_product():
-    title = request.form['title']
-    desc = request.form['desc']
-    price = request.form['price']
-    get_image = request.files['image']
-    image = cloudinary.uploader.upload(get_image)['url']
-    ########
-    # POSTED DATA SCHEMA:
-    # FORM-DATA KEY:VALUE
-    #TITLE = STRING
-    #DESC = STRING
-    #PRICE = INT
-    #IMAGE = FILE
-    ########
-    new_product = Product(title=title, desc=desc, price=price, image=image)
-    db.session.add(new_product)
-    db.session.commit()
-    product_schema = ProductSchema()
-    output = product_schema.dump(new_product)
+    # post a product
+    if request.method == 'POST':
+        title = request.form['title']
+        desc = request.form['desc']
+        price = request.form['price']
+        get_image = request.files['image']
+        image = cloudinary.uploader.upload(get_image)['url']
+        ########
+        # POSTED DATA SCHEMA:
+        # FORM-DATA KEY:VALUE
+        #TITLE = STRING
+        #DESC = STRING
+        #PRICE = INT
+        #IMAGE = FILE
+        ########
+        new_product = Product(title=title, desc=desc, price=price, image=image)
+        db.session.add(new_product)
+        db.session.commit()
+        product_schema = ProductSchema()
+        output = product_schema.dump(new_product)
 
-    return jsonify(output)
+        return jsonify(output)
+    # query a single product
+    if request.method == 'GET':
+        id = request.args.get('id')
+        print(id)
+        product = Product.query.get(id)
+        product_schema = ProductSchema()
+        output = product_schema.dump(product)
+        return jsonify(output)
 
 # get all products route
 @app.route('/')
