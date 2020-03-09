@@ -45,7 +45,7 @@ class ProductSchema(ma.ModelSchema):
 
 
 # create single product
-@app.route('/product/', methods=['POST', 'GET', 'DELETE'])
+@app.route('/product/', methods=['POST', 'GET', 'DELETE', 'PUT'])
 def create_product():
     # post a product
     if request.method == 'POST':
@@ -83,6 +83,29 @@ def create_product():
         db.session.delete(to_be_deleted)
         db.session.commit()
         return f'PRODUCT with the id = {id} has been deleted'
+
+    # query a single product then update it with new data
+    if request.method == 'PUT':
+        id = request.args.get('id')
+        updated = Product.query.get(id)
+        updated.title = request.form['title']
+        updated.desc = request.form['desc']
+        updated.price = request.form['price']
+        get_image = request.files['image']
+        updated.image = cloudinary.uploader.upload(get_image)['url']
+        db.session.merge(updated)
+        db.session.flush()
+        db.session.commit()
+
+        return 'done'
+
+        # {
+        #     "desc": "from post man",
+        #     "id": 2,
+        #     "image": "http://res.cloudinary.com/ahd3hd/image/upload/v1583778474/nqdb3jkfnfiaohumz9yl.png",
+        #     "price": 5,
+        #     "title": "postman"
+        # }
 
 # get all products route
 @app.route('/')
