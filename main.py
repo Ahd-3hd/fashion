@@ -52,7 +52,14 @@ def create_product():
     price = request.form['price']
     get_image = request.files['image']
     image = cloudinary.uploader.upload(get_image)['url']
-
+    ########
+    # POSTED DATA SCHEMA:
+    # FORM-DATA KEY:VALUE
+    #TITLE = STRING
+    #DESC = STRING
+    #PRICE = INT
+    #IMAGE = FILE
+    ########
     new_product = Product(title=title, desc=desc, price=price, image=image)
     db.session.add(new_product)
     db.session.commit()
@@ -67,7 +74,7 @@ def index():
     all_products = Product.query.all()
     product_schema = ProductSchema(many=True)
     output = product_schema.dump(all_products)
-    return render_template('index.html')
+    return jsonify(output)
 
 
 if __name__ == '__main__':
