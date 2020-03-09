@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import cloudinary
@@ -47,15 +47,19 @@ class ProductSchema(ma.ModelSchema):
 # create single product
 @app.route('/product', methods=['POST'])
 def create_product():
-    title = request.json['title']
-    desc = request.json['desc']
-    price = request.json['price']
-    image = cloudinary.uploader.upload('hii.png')['url']
+    title = request.form['title']
+    desc = request.form['desc']
+    price = request.form['price']
+    get_image = request.files['image']
+    image = cloudinary.uploader.upload(get_image)['url']
 
     new_product = Product(title=title, desc=desc, price=price, image=image)
     db.session.add(new_product)
     db.session.commit()
-    return 'done'
+    product_schema = ProductSchema()
+    output = product_schema.dump(new_product)
+
+    return jsonify(output)
 
 # get all products route
 @app.route('/')
@@ -63,7 +67,7 @@ def index():
     all_products = Product.query.all()
     product_schema = ProductSchema(many=True)
     output = product_schema.dump(all_products)
-    return jsonify({'products': output})
+    return render_template('index.html')
 
 
 if __name__ == '__main__':
