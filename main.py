@@ -45,7 +45,7 @@ class ProductSchema(ma.ModelSchema):
 
 
 # create single product
-@app.route('/product/', methods=['POST', 'GET'])
+@app.route('/product/', methods=['POST', 'GET', 'DELETE'])
 def create_product():
     # post a product
     if request.method == 'POST':
@@ -72,11 +72,17 @@ def create_product():
     # query a single product
     if request.method == 'GET':
         id = request.args.get('id')
-        print(id)
         product = Product.query.get(id)
         product_schema = ProductSchema()
         output = product_schema.dump(product)
         return jsonify(output)
+    # query a single product then delete it from the db
+    if request.method == 'DELETE':
+        id = request.args.get('id')
+        to_be_deleted = Product.query.get(id)
+        db.session.delete(to_be_deleted)
+        db.session.commit()
+        return f'PRODUCT with the id = {id} has been deleted'
 
 # get all products route
 @app.route('/')
