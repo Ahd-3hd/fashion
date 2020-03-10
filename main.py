@@ -5,6 +5,7 @@ from flask_marshmallow import Marshmallow
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
+from flask_cors import CORS, cross_origin
 
 
 # config cloudinary
@@ -18,6 +19,8 @@ cloudinary.config(
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///product.db'
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # init the db
 db = SQLAlchemy(app)
@@ -108,7 +111,7 @@ def create_product():
         # }
 
 # get all products route
-@app.route('/')
+@app.route('/products')
 def index():
     all_products = Product.query.all()
     product_schema = ProductSchema(many=True)
